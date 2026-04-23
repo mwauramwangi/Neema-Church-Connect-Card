@@ -1,0 +1,51 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // --- Connect Cards Rules ---
+    match /connectCards/{cardId} {
+      function isValidConnectCard(data) {
+        return data.firstName is string && data.firstName.size() >= 2 && data.firstName.size() <= 100 &&
+               data.lastName is string && data.lastName.size() >= 2 && data.lastName.size() <= 100 &&
+               data.email is string && data.email.size() <= 200 &&
+               data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 20 &&
+               data.streetAddress is string && data.streetAddress.size() >= 2 && data.streetAddress.size() <= 200 &&
+               data.city is string && data.city.size() >= 2 && data.city.size() <= 100 &&
+               data.state is string && data.state.size() >= 2 && data.state.size() <= 50 &&
+               data.zipCode is string && data.zipCode.size() >= 5 && data.zipCode.size() <= 20 &&
+               data.gender in ['male', 'female', 'other'] &&
+               data.ageRange is string &&
+               data.decisions is list && data.decisions.size() <= 10 &&
+               data.nextSteps is list && data.nextSteps.size() <= 10 &&
+               data.createdAt == request.time;
+      }
+
+      // Allow public creation of cards (unauthenticated visitors can fill it out)
+      // Note: If visitors are required to sign in, use isSignedIn() here
+      allow create: if isValidConnectCard(incoming());
+      
+      // Only church admins should read submissions (Hardened PII Guard)
+      // For this demo, we restrict reading to purely internal for now 
+      // or you could add specific admin UIDs here.
+      allow read: if false; 
+      allow update, delete: if false;
+    }
+  }
+}

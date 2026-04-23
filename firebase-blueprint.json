@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "ConnectCard": {
+      "title": "Connect Card",
+      "description": "Guest connect card submission for Neema Gospel Church.",
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string", "description": "First name of the guest" },
+        "lastName": { "type": "string", "description": "Last name of the guest" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "streetAddress": { "type": "string", "description": "Street address" },
+        "city": { "type": "string", "description": "City" },
+        "state": { "type": "string", "description": "State" },
+        "zipCode": { "type": "string", "description": "Zip code" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"], "description": "Gender" },
+        "ageRange": { "type": "string", "description": "Age bracket" },
+        "decisions": { "type": "array", "description": "Spiritual decisions made" },
+        "nextSteps": { "type": "array", "description": "Requested next steps" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["firstName", "lastName", "email", "phone", "streetAddress", "city", "state", "zipCode", "gender", "ageRange"]
+    }
+  },
+  "firestore": {
+    "connectCards/{cardId}": {
+      "schema": "ConnectCard",
+      "description": "Collection of visitor connect cards."
+    }
+  }
+}
